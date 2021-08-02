@@ -8,26 +8,28 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "postmon": "dist/main.js"
+    "postmon": "dist/main.cjs"
   },
   "scripts": {
-    "build": "node esbuild.cjs",
-    "dev": "nodemon -w src -e ts -x \"pnpm build && node dist/main.js\""
+    "build": "node --experimental-json-modules esbuild.cjs",
+    "dev": "nodemon -w src -e ts -x \"pnpm build && node --experimental-json-modules dist/main.mjs\""
   },
   "devDependencies": {
+    "@types/fs-extra": "9.0.12",
     "@types/node": "16.4.9",
     "esbuild": "0.12.17",
-    "fast-glob": "3.2.7",
     "nodemon": "2.0.12",
     "ts-node-dev": "1.1.8",
+    "hash-obj": "4.0.0",
+    "p-map": "5.1.0",
+    "puka": "1.0.1",
     "typescript": "4.3.5"
   },
   "dependencies": {
-    "commander": "8.1.0",
-    "hash-obj": "4.0.0",
     "hasha": "5.2.2",
-    "p-map": "5.1.0",
+    "fs-extra": "10.0.0",
+    "commander": "8.1.0",
     "promisify-child-process": "4.1.1",
-    "puka": "1.0.1"
+    "fast-glob": "3.2.7"
   }
 }
