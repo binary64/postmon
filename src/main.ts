@@ -11,6 +11,8 @@ import {cpus} from 'os'
 import {quoteForSh} from 'puka'
 import {version} from '../package.json'
 
+console.log("[postmon] Starting...")
+
 const {writeFile, readFile} = fs
 
 //const version = "0.0.1"
@@ -19,12 +21,13 @@ const lockFileName = ".postmon-lock";
 const program = new Command();
 const {args} = program.version(version, '-v, --version', 'output the current version')
 .option("-d, --debug", "Echo additional debugging messages")
+.option("-i, --include <glob>", "File glob to scan for changes")
 .argument("<exec...>", "Command line to execute if there are changes")
 .parse(process.argv)
 
-const debug = program.getOptionValue("debug")
+const {debug,include} = program.opts()
 
-if (debug) console.log("args",args)
+if (debug) console.log("args", args)
 if (debug) console.log("cpus", cpus().length)
 
 ;(async () => {
@@ -35,10 +38,11 @@ if (debug) console.log("cpus", cpus().length)
         process.exit(1)
     }
 
-    if (debug) console.log("[postmon] Starting... cwd:", process.cwd(), "cores:", numberOfCores)
+    if (debug) console.log("[postmon] cwd:", process.cwd(), "cores:", numberOfCores)
+    if (debug) console.log("[postmon] include: " + JSON.stringify(include))
 
     if (debug) console.time("finding files")
-    const files = await fg(["**/*.ts"], { dot: true })
+    const files = await fg(include, { dot: true })
     if (debug) console.timeEnd("finding files")
     if (debug) console.log("[postmon] Found", files.length, "matches")
 

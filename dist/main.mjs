@@ -846,11 +846,12 @@ import { cpus } from "os";
 var version = "0.0.1";
 
 // src/main.ts
+console.log("[postmon] Starting...");
 var { writeFile, readFile } = fs;
 var lockFileName = ".postmon-lock";
 var program = new Command();
-var { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").argument("<exec...>", "Command line to execute if there are changes").parse(process.argv);
-var debug = program.getOptionValue("debug");
+var { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").argument("<exec...>", "Command line to execute if there are changes").parse(process.argv);
+var { debug, include } = program.opts();
 if (debug)
   console.log("args", args);
 if (debug)
@@ -862,10 +863,12 @@ if (debug)
     process.exit(1);
   }
   if (debug)
-    console.log("[postmon] Starting... cwd:", process.cwd(), "cores:", numberOfCores);
+    console.log("[postmon] cwd:", process.cwd(), "cores:", numberOfCores);
+  if (debug)
+    console.log("[postmon] include: " + JSON.stringify(include));
   if (debug)
     console.time("finding files");
-  const files = await fg(["**/*.ts"], { dot: true });
+  const files = await fg(include, { dot: true });
   if (debug)
     console.timeEnd("finding files");
   if (debug)
