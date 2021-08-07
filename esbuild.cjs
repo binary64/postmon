@@ -1,17 +1,9 @@
 require("esbuild")
   .build({
-    entryPoints: ["src/main.ts"],
-    bundle: true,
+    entryPoints: ["src/cli.ts"],
     format: "esm",
     platform: "node",
-    outfile: "dist/main.mjs",
+    outfile: "dist/cli.mjs",
     sourcemap: true,
-    external: [
-      "hasha",
-      "fs-extra",
-      "commander",
-      "promisify-child-process",
-      "fast-glob",
-    ],
   })
   .catch(() => process.exit(1));
