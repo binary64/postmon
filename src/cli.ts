@@ -30,10 +30,11 @@ const { args } = program
   .version(version, '-v, --version', 'output the current version')
   .option('-d, --debug', 'Echo additional debugging messages')
   .option('-i, --include <glob>', 'File glob to scan for changes')
-  .argument('<exec...>', 'Command line to execute if there are changes')
+  .argument('[exec...]', 'Command line to execute if there are changes')
   .parse(process.argv)
 
-const { debug, include } = program.opts()
+const { include } = program.opts()
+const debug = true
 
 const numberOfCpus = cpus()?.length
 if (!numberOfCpus || numberOfCpus <= 0) {
@@ -51,8 +52,8 @@ if (debug) {
   log('include', include)
 }
 
-;(async () => {
-  if (debug) console.time('finding files')
+async function doTask(include) {
+  if (debug) console.time('finding files', include)
   const files = await fg(include, { dot: true })
   if (debug) console.timeEnd('finding files')
   if (debug) console.log('Found', files.length, 'matches')
@@ -105,4 +106,8 @@ if (debug) {
     await writeFile(lockFileName, overallHash)
     log(`Written new hash to ${lockFileName}`)
   }
+}
+
+;(async () => {
+  if (include) doTask(include)
 })()
