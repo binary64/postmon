@@ -19,12 +19,13 @@
     "clean": "rimraf dist",
     "prepublish": "pnpm build && packito",
     "build": "node esbuild.cjs",
-    "dev": "nodemon -w src -e ts -x \"pnpm build && node dist/main.mjs\""
+    "dev": "nodemon -w src -e ts -x \"pnpm build && node dist/cli.mjs\""
   },
   "devDependencies": {
     "@types/fs-extra": "9.0.12",
-    "@types/node": "16.4.12",
+    "@types/node": "16.4.13",
     "esbuild": "0.12.18",
+    "esbuild-node-externals": "^1.3.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-typescript-prettier": "^4.2.0",
     "nodemon": "2.0.12",

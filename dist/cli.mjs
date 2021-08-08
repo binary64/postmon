@@ -16,8 +16,9 @@ function log(message, ...rest) {
 }
 log("Starting", version);
 const program = new Command();
-const { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").argument("<exec...>", "Command line to execute if there are changes").parse(process.argv);
-const { debug, include } = program.opts();
+const { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").argument("[exec...]", "Command line to execute if there are changes").parse(process.argv);
+const { include } = program.opts();
+const debug = true;
 const numberOfCpus = cpus()?.length;
 if (!numberOfCpus || numberOfCpus <= 0) {
   log("Error, can't detect your CPU");
@@ -32,11 +33,10 @@ if (debug) {
   log("cores:", numberOfCores);
   log("include", include);
 }
-;
-(async () => {
+async function doTask(include2) {
   if (debug)
-    console.time("finding files");
-  const files = await fg(include, { dot: true });
+    console.time("finding files", include2);
+  const files = await fg(include2, { dot: true });
   if (debug)
     console.timeEnd("finding files");
   if (debug)
@@ -84,5 +84,10 @@ if (debug) {
     await writeFile(lockFileName, overallHash);
     log(`Written new hash to ${lockFileName}`);
   }
+}
+;
+(async () => {
+  if (include)
+    doTask(include);
 })();
 //# sourceMappingURL=cli.mjs.map
