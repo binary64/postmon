@@ -1,3 +1,6 @@
 node_modules
 *.log
 .postmon-lock
+dist/package.json
+dist/*.md
+pnpm-lock.yaml
