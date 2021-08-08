@@ -1,0 +1,29 @@
+Configure your codegens here as a DAG
+---
+scripts:
+  graphql-codegen:
+    inputs:
+      - codegen.yml
+      - schema.graphql
+      - 'graphql/**/*.graphql'
+    command: yarn graphql-codegen
+  nexus:
+    inputs:
+      - api/src/**/*
+    outputs:
+      - api/src/generated/nexus.d.ts
+    command: yarn nexus:generate
+  pal:
+    inputs:
+      - pal.js
+      - api/src/prisma/schema.prisma
+      - node_modules/.prisma/
+    outputs:
+      - api/src/types
+      - libs/graphql/mutations/
+    command: yarn rimraf graphql/mutations api/src/generated/types && yarn pal g
+  prisma:
+    inputs:
+      - api/src/prisma/schema.prisma
+    outputs:
+      - node_modules/.prisma/

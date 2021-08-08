@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+// src/cli.ts
 import hasha from "hasha";
 import fg from "fast-glob";
 import hashObject from "hash-obj";
@@ -8,35 +10,36 @@ import { spawnSync as exec } from "child_process";
 import pMap from "p-map";
 import { cpus } from "os";
 import { quoteForSh } from "puka";
-const { writeFile, readFile } = fs;
-const { version } = JSON.parse((await readFile(new URL("../package.json", import.meta.url))).toString());
-const lockFileName = ".postmon-lock";
+import jsYaml from "js-yaml";
+var { writeFile, readFile } = fs;
+var { version } = JSON.parse((await readFile(new URL("../package.json", import.meta.url))).toString());
+var lockFileName = ".postmon-lock";
 function log(message, ...rest) {
   console.log(`[postmon] ${message}`, ...rest);
 }
 log("Starting", version);
-const program = new Command();
-const { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").argument("[exec...]", "Command line to execute if there are changes").parse(process.argv);
-const { include } = program.opts();
-const debug = true;
-const numberOfCpus = cpus()?.length;
+var program = new Command();
+var { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").option("--name <name>", "A string identifer for this execution").argument("[exec...]", "Command line to execute if there are changes").parse(process.argv);
+var opts = program.opts();
+var debug = true;
+var numberOfCpus = cpus()?.length;
 if (!numberOfCpus || numberOfCpus <= 0) {
   log("Error, can't detect your CPU");
   log("result:", cpus());
   process.exit(1);
 }
-const numberOfCores = Math.max(1, Math.round(numberOfCpus / 2));
+var numberOfCores = Math.max(1, Math.round(numberOfCpus / 2));
 if (debug) {
   log("args", args);
   log("cpus", cpus().length);
   log("cwd:", process.cwd());
   log("cores:", numberOfCores);
-  log("include", include);
+  log("include", opts.include);
 }
-async function doTask(include2) {
+async function getHashOfDirectory(directoryGlobs) {
   if (debug)
-    console.time("finding files", include2);
-  const files = await fg(include2, { dot: true });
+    console.time("finding files", directoryGlobs);
+  const files = await fg(directoryGlobs, { dot: true });
   if (debug)
     console.timeEnd("finding files");
   if (debug)
@@ -53,41 +56,55 @@ async function doTask(include2) {
     console.log("rendered", JSON.stringify(matches).length, "bytes of state object");
   if (debug)
     console.time("hashing object");
-  const overallHash = hashObject([matches.sort(), files.sort()], {
+  const ret = hashObject([matches.sort(), files.sort()], {
     algorithm: "sha512"
   });
   if (debug)
     console.timeEnd("hashing object");
+  return ret;
+}
+function isDocumentWithKey(keyName) {
+  return function(e) {
+    return typeof e === "object" && keyName in e;
+  };
+}
+async function doTask(directoryGlob, name = "default", commandLine) {
+  if (!commandLine)
+    throw new Error("Must have a commandLine");
+  console.log(name, directoryGlob);
+  const overallHash = await getHashOfDirectory(directoryGlob);
   if (debug)
     log("Current hash", overallHash);
-  let storedHash = "";
-  try {
-    const fileContents = await readFile(lockFileName);
-    storedHash = fileContents.toString();
-    if (debug)
-      log("Lock hash", storedHash);
-  } catch {
+  const rawFile = (await readFile(lockFileName)).toString();
+  const storedHashes = rawFile[0] === "{" && JSON.parse(rawFile) || {};
+  if (Object.keys(storedHashes).length === 0)
     log(`First time setup -- will create ${lockFileName} file if successful...`);
-  }
-  if (storedHash === overallHash) {
-    log(`No changes detected in ${files.length} files -- skipping execution.`);
+  if (storedHashes?.[name] === overallHash) {
+    log(`No changes detected -- skipping execution.`);
     return;
   }
-  log(`Executing: ${args.map((e) => quoteForSh(e)).join(" ")}`);
-  const output = exec(args.map((e) => quoteForSh(e)).join(" "), {
+  log(`Executing: ${commandLine}`);
+  const output = exec(commandLine, {
     shell: true,
     stdio: "inherit"
   });
   if (debug)
     log("output", output);
   if (output.status === 0) {
-    await writeFile(lockFileName, overallHash);
-    log(`Written new hash to ${lockFileName}`);
+    await writeFile(lockFileName, JSON.stringify({ ...storedHashes, [name]: overallHash }));
+    log(`Written new hash for '${name}' to ${lockFileName}`);
   }
 }
-;
 (async () => {
-  if (include)
-    doTask(include);
+  if (opts.include)
+    doTask(opts.include, opts.name, args.map((e) => quoteForSh(e)).join(" "));
+  else {
+    const yml = jsYaml.loadAll(fs.readFileSync(".postmon.yml").toString()).find(isDocumentWithKey("scripts"));
+    if (!yml)
+      throw new Error("Define a .postmon.yml file first.");
+    const mapper = ([name, { inputs, command }]) => doTask(inputs, name, command);
+    await pMap(Object.entries(yml.scripts).filter(([, { command }]) => !!command), mapper, { concurrency: 1 });
+    console.log("All done.");
+  }
 })();
 //# sourceMappingURL=cli.mjs.map

@@ -25,10 +25,38 @@ Add to your `package.json` > `"scripts"` > `"post*"` section
 ```json
 {
   "scripts": {
-    "postinstall": "postmon --include src/**/*.ts echo \"Changes detected in your files\""
+    "postinstall": "postmon --include \"src/**/*.ts\" echo \"Changes detected in your files\""
   }
 }
 ```
+
+## Advanced Configuration
+
+You can add a `.postmon.yml` file to your repo, which describes the graph of code generations to be run. To invoke using this file, simple call `postmon` with no arguments:
+
+```json
+{
+  "scripts": {
+    "postinstall": "postmon"
+  }
+}
+```
+
+The format of `.postmon.yml` is as follows:
+
+```yml
+scripts:
+  <name>:
+    inputs:
+      - <file glob>
+    outputs:
+      - <file glob>
+    command: <shell command line>
+  ...
+```
+
+And example can be found in `examples/prisma-nexus/.postmon.yml`.
+
 
 ## Contributing
 
