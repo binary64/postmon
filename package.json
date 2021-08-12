@@ -1,6 +1,6 @@
 {
   "name": "postmon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An npm script that runs another script only if the contents of a directory have changed",
   "repository": "git@github.com:binary64/postmon.git",
   "author": "binary64 <1680627+binary64@users.noreply.github.com>",
