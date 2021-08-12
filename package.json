@@ -17,7 +17,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "prepublish": "pnpm build && packito",
+    "prepublish": "pnpm clean && pnpm build && packito",
     "build": "node esbuild.mjs",
     "dev": "nodemon -w src -e ts -x \"pnpm build && node dist/cli.mjs\""
   },
