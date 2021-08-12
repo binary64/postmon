@@ -75,8 +75,8 @@ async function doTask(directoryGlob, name = "default", commandLine) {
   const overallHash = await getHashOfDirectory(directoryGlob);
   if (debug)
     log("Current hash", overallHash);
-  const rawFile = (await readFile(lockFileName)).toString();
-  const storedHashes = rawFile[0] === "{" && JSON.parse(rawFile) || {};
+  const rawFile = (await readFile(lockFileName).catch(() => "")).toString();
+  const storedHashes = rawFile[0] === "{" && (rawFile ? JSON.parse(rawFile) : {}) || {};
   if (Object.keys(storedHashes).length === 0)
     log(`First time setup -- will create ${lockFileName} file if successful...`);
   if (storedHashes?.[name] === overallHash) {

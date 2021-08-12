@@ -113,10 +113,11 @@ async function doTask(
   const overallHash = await getHashOfDirectory(directoryGlob)
   if (debug) log('Current hash', overallHash)
 
-  const rawFile = (await readFile(lockFileName)).toString()
+  const rawFile = (await readFile(lockFileName).catch(() => '')).toString()
 
   const storedHashes =
-    (rawFile[0] === '{' && (JSON.parse(rawFile) as Record<string, string>)) ||
+    (rawFile[0] === '{' &&
+      (rawFile ? (JSON.parse(rawFile) as Record<string, string>) : {})) ||
     {}
 
   if (Object.keys(storedHashes).length === 0)
