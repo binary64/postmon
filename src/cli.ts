@@ -30,7 +30,7 @@ const program = new Command()
 const { args } = program
   .version(version, '-v, --version', 'output the current version')
   .option('-d, --debug', 'Echo additional debugging messages')
-  .option('-i, --include <glob>', 'File glob to scan for changes')
+  .option('-i, --include [globs...]', 'File glob to scan for changes')
   .option('--name <name>', 'A string identifer for this execution')
   .argument('[exec...]', 'Command line to execute if there are changes')
   .parse(process.argv)

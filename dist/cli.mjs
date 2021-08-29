@@ -19,7 +19,7 @@ function log(message, ...rest) {
 }
 log("Starting", version);
 var program = new Command();
-var { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include <glob>", "File glob to scan for changes").option("--name <name>", "A string identifer for this execution").argument("[exec...]", "Command line to execute if there are changes").parse(process.argv);
+var { args } = program.version(version, "-v, --version", "output the current version").option("-d, --debug", "Echo additional debugging messages").option("-i, --include [globs...]", "File glob to scan for changes").option("--name <name>", "A string identifer for this execution").argument("[exec...]", "Command line to execute if there are changes").parse(process.argv);
 var opts = program.opts();
 var debug = true;
 var numberOfCpus = cpus()?.length;

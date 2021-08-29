@@ -60,4 +60,4 @@ And example can be found in `examples/prisma-nexus/.postmon.yml`.
 
 ## Contributing
 
-To install for development, check out this repo and do `pnpm i && pnpm dev` - then in another terminal you can repeatedly do a `node dist/main.mjs`
+To install for development, check out this repo and do `pnpm i && pnpm dev` - then in another terminal you can repeatedly do a `node dist/cli.mjs`
