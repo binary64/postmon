@@ -12,7 +12,9 @@ import { cpus } from "os";
 import { quoteForSh } from "puka";
 import jsYaml from "js-yaml";
 var { writeFile, readFile } = fs;
-var { version } = JSON.parse((await readFile(new URL("../package.json", import.meta.url))).toString());
+var { version } = JSON.parse(
+  (await readFile(new URL("../package.json", import.meta.url))).toString()
+);
 var lockFileName = ".postmon-lock";
 function log(message, ...rest) {
   console.log(`[postmon] ${message}`, ...rest);
@@ -53,7 +55,11 @@ async function getHashOfDirectory(directoryGlobs) {
   if (debug)
     console.timeEnd("hashing files");
   if (debug)
-    console.log("rendered", JSON.stringify(matches).length, "bytes of state object");
+    console.log(
+      "rendered",
+      JSON.stringify(matches).length,
+      "bytes of state object"
+    );
   if (debug)
     console.time("hashing object");
   const ret = hashObject([matches.sort(), files.sort()], {
@@ -91,7 +97,10 @@ async function doTask(directoryGlob, name = "default", commandLine) {
   if (debug)
     log("output", output);
   if (output.status === 0) {
-    await writeFile(lockFileName, JSON.stringify({ ...storedHashes, [name]: overallHash }));
+    await writeFile(
+      lockFileName,
+      JSON.stringify({ ...storedHashes, [name]: overallHash })
+    );
     log(`Written new hash for '${name}' to ${lockFileName}`);
   }
 }
@@ -103,7 +112,11 @@ async function doTask(directoryGlob, name = "default", commandLine) {
     if (!yml)
       throw new Error("Define a .postmon.yml file first.");
     const mapper = ([name, { inputs, command }]) => doTask(inputs, name, command);
-    await pMap(Object.entries(yml.scripts).filter(([, { command }]) => !!command), mapper, { concurrency: 1 });
+    await pMap(
+      Object.entries(yml.scripts).filter(([, { command }]) => !!command),
+      mapper,
+      { concurrency: 1 }
+    );
     console.log("All done.");
   }
 })();

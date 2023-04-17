@@ -1,6 +1,6 @@
 {
   "name": "postmon",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "An npm script that runs another script only if the contents of a directory have changed",
   "repository": "git@github.com:binary64/postmon.git",
   "author": "binary64 <1680627+binary64@users.noreply.github.com>",
@@ -19,30 +19,30 @@
     "clean": "rimraf dist",
     "prepublish": "pnpm clean && pnpm build && packito",
     "build": "node esbuild.mjs",
-    "dev": "nodemon -w src -e ts -x \"pnpm build && node dist/cli.mjs\""
+    "dev": "pnpm build && node dist/cli.mjs"
   },
   "devDependencies": {
-    "@types/fs-extra": "9.0.12",
-    "@types/js-yaml": "^4.0.2",
-    "@types/node": "16.4.13",
-    "esbuild": "0.12.18",
-    "esbuild-node-externals": "^1.3.0",
-    "eslint": "^7.32.0",
-    "eslint-config-airbnb-typescript-prettier": "^4.2.0",
-    "nodemon": "2.0.12",
-    "prettier": "^2.3.2",
-    "rimraf": "^3.0.2",
-    "ts-node-dev": "1.1.8",
-    "typescript": "4.3.5"
+    "@types/fs-extra": "11.0.1",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "18.15.11",
+    "esbuild": "0.17.17",
+    "esbuild-node-externals": "^1.7.0",
+    "eslint": "^8.38.0",
+    "eslint-config-airbnb-typescript-prettier": "^5.0.0",
+    "nodemon": "2.0.22",
+    "prettier": "^2.8.7",
+    "rimraf": "^5.0.0",
+    "ts-node-dev": "2.0.0",
+    "typescript": "5.0.4"
   },
   "dependencies": {
-    "commander": "8.1.0",
-    "fast-glob": "3.2.7",
-    "fs-extra": "10.0.0",
+    "commander": "10.0.1",
+    "fast-glob": "3.2.12",
+    "fs-extra": "11.1.1",
     "hash-obj": "4.0.0",
     "hasha": "5.2.2",
     "js-yaml": "^4.1.0",
-    "p-map": "5.1.0",
+    "p-map": "5.5.0",
     "packito": "^0.5.0",
     "puka": "1.0.1"
   }

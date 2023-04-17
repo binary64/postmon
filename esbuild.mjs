@@ -13,4 +13,3 @@ build({
   plugins: [nodeExternalsPlugin()],
 })
   .then(() => console.log('Compiled.'))
-  .catch(() => process.exit(1))
