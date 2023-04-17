@@ -55,7 +55,7 @@ if (debug) {
 }
 
 async function getHashOfDirectory(directoryGlobs: string | string[]) {
-  if (debug) console.time('finding files', directoryGlobs)
+  if (debug) console.log('finding files', directoryGlobs)
   const files = await fg(directoryGlobs, { dot: true })
   if (debug) console.timeEnd('finding files')
   if (debug) console.log('Found', files.length, 'matches')
@@ -105,10 +105,9 @@ async function doTask(
   directoryGlob: string | string[],
   name = 'default',
   commandLine: string
-) {
+): Promise<boolean> {
   if (!commandLine) throw new Error('Must have a commandLine')
 
-  console.log(name, directoryGlob)
 
   const overallHash = await getHashOfDirectory(directoryGlob)
   if (debug) log('Current hash', overallHash)
@@ -125,7 +124,7 @@ async function doTask(
 
   if (storedHashes?.[name] === overallHash) {
     log(`No changes detected -- skipping execution.`)
-    return
+    return true
   }
 
   // Execute
@@ -144,6 +143,8 @@ async function doTask(
     )
     log(`Written new hash for '${name}' to ${lockFileName}`)
   }
+
+  return output.status === 0
 }
 
 ;(async () => {
@@ -156,12 +157,9 @@ async function doTask(
       .find(isDocumentWithKey<PostmonConfig>('scripts'))
     if (!yml) throw new Error('Define a .postmon.yml file first.')
 
-    // Run em all, who cares about Zen2 contention anyway
-    const mapper = ([name, { inputs, command }]) =>
-      doTask(inputs, name, command)
-    await pMap(
+    const mapper = await pMap(
       Object.entries(yml.scripts).filter(([, { command }]) => !!command),
-      mapper,
+      ([name, { inputs, command }]) => doTask(inputs, name, command),
       { concurrency: 1 }
     )
 
