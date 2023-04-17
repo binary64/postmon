@@ -40,7 +40,7 @@ if (debug) {
 }
 async function getHashOfDirectory(directoryGlobs) {
   if (debug)
-    console.time("finding files", directoryGlobs);
+    console.log("finding files", directoryGlobs);
   const files = await fg(directoryGlobs, { dot: true });
   if (debug)
     console.timeEnd("finding files");
@@ -77,7 +77,6 @@ function isDocumentWithKey(keyName) {
 async function doTask(directoryGlob, name = "default", commandLine) {
   if (!commandLine)
     throw new Error("Must have a commandLine");
-  console.log(name, directoryGlob);
   const overallHash = await getHashOfDirectory(directoryGlob);
   if (debug)
     log("Current hash", overallHash);
@@ -87,7 +86,7 @@ async function doTask(directoryGlob, name = "default", commandLine) {
     log(`First time setup -- will create ${lockFileName} file if successful...`);
   if (storedHashes?.[name] === overallHash) {
     log(`No changes detected -- skipping execution.`);
-    return;
+    return true;
   }
   log(`Executing: ${commandLine}`);
   const output = exec(commandLine, {
@@ -103,6 +102,7 @@ async function doTask(directoryGlob, name = "default", commandLine) {
     );
     log(`Written new hash for '${name}' to ${lockFileName}`);
   }
+  return output.status === 0;
 }
 (async () => {
   if (opts.include)
@@ -111,10 +111,9 @@ async function doTask(directoryGlob, name = "default", commandLine) {
     const yml = jsYaml.loadAll(fs.readFileSync(".postmon.yml").toString()).find(isDocumentWithKey("scripts"));
     if (!yml)
       throw new Error("Define a .postmon.yml file first.");
-    const mapper = ([name, { inputs, command }]) => doTask(inputs, name, command);
-    await pMap(
+    const mapper = await pMap(
       Object.entries(yml.scripts).filter(([, { command }]) => !!command),
-      mapper,
+      ([name, { inputs, command }]) => doTask(inputs, name, command),
       { concurrency: 1 }
     );
     console.log("All done.");
